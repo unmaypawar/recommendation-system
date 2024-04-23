@@ -1,6 +1,10 @@
 import sys
 from pyspark import SparkContext
 import csv
+import json
+import numpy as np
+from xgboost import XGBRegressor
+from catboost import CatBoostRegressor
 import time
 
 
@@ -129,7 +133,85 @@ def index_val(business_id, user_id, business_train_index, users_train_index):
 	return (business_index, user_index)
 
 
-def item_based_collaborative_filtering():
+def get_features(x, review_dict, user_dict, business_dict):
+	user_id = x[0]
+	business_id = x[1]
+
+	default_feature = (None, None, None)
+
+	if business_id in review_dict:
+		review_feature = review_dict[business_id]
+	else:
+		review_feature = default_feature
+
+	if user_id in user_dict:
+		user_feature = user_dict[user_id]
+	else:
+		user_feature = default_feature
+
+	if business_id in business_dict:
+		business_feature = business_dict[business_id]
+	else:
+		business_feature = default_feature
+
+	return [*review_feature, *user_feature, *business_feature]
+
+
+def get_average(rating):
+	useful = 0
+	funny = 0
+	cool = 0
+
+	for u, f, c in rating:
+		useful += u
+		funny += f
+		cool += c
+
+	n = len(rating)
+	if n:
+		return (useful / n, funny / n, cool / n)
+	else:
+		return (None, None, None)
+
+
+def get_xgb_output(train_x, train_y, val_x):
+	param = {
+        'lambda': 9.92724463758443,
+        'alpha': 0.2765119705933928,
+        'colsample_bytree': 0.5,
+        'subsample': 0.8,
+        'learning_rate': 0.02,
+        'max_depth': 17,
+        'random_state': 2020,
+        'min_child_weight': 101,
+        'n_estimators': 300,
+    	}
+
+	xgb = XGBRegressor(**param)
+	xgb.fit(train_x, train_y)
+	val_y = xgb.predict(val_x)
+
+	return val_y
+
+def get_catboost_output(train_x, train_y, val_x):
+	param = {
+		'random_state': 1, 
+		'learning_rate': 0.05, 
+		'n_estimators': 1000, 
+		'max_depth': 10, 
+		'max_bin': 256, 
+		'verbose': 0, 
+		'colsample_bylevel': 0.8
+		}
+
+	catboost = CatBoostRegressor(**param)
+	catboost.fit(train_x, train_y)
+	val_y = catboost.predict(val_x)
+
+	return val_y
+
+
+def item_based_collaborative_filtering(yelp_train, yelp_val):
 	users_train = yelp_train.map(lambda x: x[0]).distinct().zipWithIndex()
 	users_train_index = users_train.map(lambda x: (x[0], x[1])).collectAsMap()
 
@@ -163,13 +245,43 @@ def item_based_collaborative_filtering():
 	return item_cf_output
 
 
-def model_based_collaborative_filtering():
+def model_based_collaborative_filtering(yelp_train, yelp_val):
+	review_dict = sc.textFile(folder_path + '/review_train.json').map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], (float(x['useful']), float(x['funny']), float(x['cool'])))).groupByKey().mapValues(get_average).collectAsMap()
+	user_dict = sc.textFile(folder_path + '/user.json').map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], (float(x['average_stars']), float(x['review_count']), float(x['fans']), float(x['useful']), float(x['compliment_note']), float(x['compliment_hot']), float(x['compliment_more']), float(x['compliment_profile']), float(x['compliment_cute']), float(x['compliment_list']), float(x['compliment_plain']), float(x['compliment_cool']), float(x['compliment_funny']), float(x['compliment_writer']), float(x['compliment_photos'])))).collectAsMap()
+	business_dict = sc.textFile(folder_path + '/business.json').map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], (float(x['stars']), float(x['review_count']), float(x['is_open'])))).collectAsMap()
 
+	yelp_train = yelp_train.collect()
+	yelp_val = yelp_val.collect()
+
+	train_x = np.array([get_features(x, review_dict, user_dict, business_dict) for x in yelp_train], dtype = 'float32')
+	train_y = np.array([float(x[2]) for x in yelp_train], dtype = 'float32')
+	val_x = np.array([get_features(x, review_dict, user_dict, business_dict) for x in yelp_val], dtype = 'float32')
+
+	xgb_output = get_xgb_output(train_x, train_y, val_x)
+	catboost_output = get_catboost_output(train_x, train_y, val_x)
+
+	model_cf_output = []
+	for xgb, catboost in zip(xgb_output, catboost_output):
+		model_cf_output.append(0.5 * xgb + 0.5 * catboost)
 
 	return model_cf_output
 
 
 def get_final_output(item_cf_output, model_cf_output):
+	output = []
+	alpha = 0.0
+	for item, model in zip(item_cf_output, model_cf_output):
+		final_rating = alpha * item[2] + (1 - alpha) * model
+		if final_rating < 1:
+			final_rating = 1.0
+		elif final_rating > 5:
+			final_rating = 5.0
+
+		temp_output = []
+		temp_output.append(item[0])
+		temp_output.append(item[1])
+		temp_output.append(final_rating)
+		output.append(temp_output)
 
 	return output
 
@@ -190,15 +302,15 @@ yelp_train = sc.textFile(folder_path + '/yelp_train.csv').zipWithIndex().filter(
 yelp_val = sc.textFile(val_file).zipWithIndex().filter(lambda x: x[1] > 0).map(lambda x: x[0].split(','))
 
 
-item_cf_output = item_based_collaborative_filtering()
-#model_cf_output = model_based_collaborative_filtering()
-#output = get_final_output(item_cf_output, model_cf_output)
+item_cf_output = item_based_collaborative_filtering(yelp_train, yelp_val)
+model_cf_output = model_based_collaborative_filtering(yelp_train, yelp_val)
+output = get_final_output(item_cf_output, model_cf_output)
 
 
 with open(output_file, 'w') as out_file:
 	writer = csv.writer(out_file)
 	writer.writerows([['user_id', 'business_id', 'prediction']])
-	writer.writerows(item_cf_output)
+	writer.writerows(output)
 
 
 get_stats()
