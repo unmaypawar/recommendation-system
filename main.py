@@ -17,17 +17,17 @@ I combined output of XGBoost and CatBoost using linear formula and choosing the 
 P.S. Code for hyperparameter tuning is at the end and commented out because of time constraints and also optuna isn't available on vocareum.
 
 Error Distribution:
-0-1 : 102408
-1-2 : 32735
-2-3 : 6110
-3-4 : 791
-4-5 : 0
+0-1 : 102551
+1-2 : 32596
+2-3 : 6096
+3-4 : 800
+4-5 : 1
 
 RMSE:
-0.9757425782700765 
+0.9756182698416483 
 
 Execution Time:
-395.0 s
+482.05 s
 '''
 
 
@@ -113,10 +113,10 @@ def create_business_features(business_data):
     else:
         is_open = 0
 
-    if 'categories' in business_data and business_data['categories'] != None:
+    '''if 'categories' in business_data and business_data['categories'] != None:
         categories = int(len(business_data['categories']))
     else:
-        categories = 0
+        categories = 0'''
 
     if 'attributes' in business_data and business_data['attributes'] != None:
         if 'GoodForKids' in business_data['attributes'] and business_data['attributes']['GoodForKids'] != None:
@@ -134,45 +134,45 @@ def create_business_features(business_data):
         else:
             BusinessAcceptsCreditCards = 0
 
-        if 'BikeParking' in business_data['attributes'] and business_data['attributes']['BikeParking'] != None:
+        '''if 'BikeParking' in business_data['attributes'] and business_data['attributes']['BikeParking'] != None:
             BikeParking = 1 if (business_data['attributes']['BikeParking'] == 'True' or business_data['attributes']['BikeParking'] is True) == True else 0
         else:
-            BikeParking = 0
+            BikeParking = 0'''
 
         if 'OutdoorSeating' in business_data['attributes'] and business_data['attributes']['OutdoorSeating'] != None:
             OutdoorSeating = 1 if (business_data['attributes']['OutdoorSeating'] == 'True' or business_data['attributes']['OutdoorSeating'] is True) else 0
         else:
             OutdoorSeating = 0
 
-        if 'RestaurantsDelivery' in business_data['attributes'] and business_data['attributes']['RestaurantsDelivery'] != None:
+        '''if 'RestaurantsDelivery' in business_data['attributes'] and business_data['attributes']['RestaurantsDelivery'] != None:
             RestaurantsDelivery = 1 if (business_data['attributes']['RestaurantsDelivery'] == 'True' or business_data['attributes']['RestaurantsDelivery'] is True) else 0
         else:
-            RestaurantsDelivery = 0
+            RestaurantsDelivery = 0'''
 
-        if 'Caters' in business_data['attributes'] and business_data['attributes']['Caters'] != None:
+        '''if 'Caters' in business_data['attributes'] and business_data['attributes']['Caters'] != None:
             Caters = 1 if (business_data['attributes']['Caters'] == 'True' or business_data['attributes']['Caters'] is True) else 0
         else:
-            Caters = 0
+            Caters = 0'''
 
         if 'HasTV' in business_data['attributes'] and business_data['attributes']['HasTV'] != None:
             HasTV = 1 if (business_data['attributes']['HasTV'] == 'True' or business_data['attributes']['HasTV'] is True) else 0
         else:
             HasTV = 0
 
-        if 'RestaurantsReservations' in business_data['attributes'] and business_data['attributes']['RestaurantsReservations'] != None:
+        '''if 'RestaurantsReservations' in business_data['attributes'] and business_data['attributes']['RestaurantsReservations'] != None:
             RestaurantsReservations = 1 if (business_data['attributes']['RestaurantsReservations'] == 'True' or business_data['attributes']['RestaurantsReservations'] is True) else 0
         else:
-            RestaurantsReservations = 0
+            RestaurantsReservations = 0'''
 
         if 'RestaurantsTableService' in business_data['attributes'] and business_data['attributes']['RestaurantsTableService'] != None:
             RestaurantsTableService = 1 if (business_data['attributes']['RestaurantsTableService'] == 'True' or business_data['attributes']['RestaurantsTableService'] is True) else 0
         else:
             RestaurantsTableService = 0
 
-        if 'ByAppointmentOnly' in business_data['attributes'] and business_data['attributes']['ByAppointmentOnly'] != None:
+        '''if 'ByAppointmentOnly' in business_data['attributes'] and business_data['attributes']['ByAppointmentOnly'] != None:
             ByAppointmentOnly = 1 if (business_data['attributes']['ByAppointmentOnly'] == 'True' or business_data['attributes']['ByAppointmentOnly'] is True) else 0
         else:
-            ByAppointmentOnly = 0
+            ByAppointmentOnly = 0'''
 
         if 'RestaurantsTakeOut' in business_data['attributes'] and business_data['attributes']['RestaurantsTakeOut'] != None:
             RestaurantsTakeOut = 1 if (business_data['attributes']['RestaurantsTakeOut'] == 'True' or business_data['attributes']['RestaurantsTakeOut'] is True) else 0
@@ -204,7 +204,7 @@ def create_business_features(business_data):
         else:
             no_wifi_info = 1
 
-        if 'Ambience' in business_data['attributes'] and business_data['attributes']['Ambience'] != None:
+        '''if 'Ambience' in business_data['attributes'] and business_data['attributes']['Ambience'] != None:
             Ambience_dict = json.loads(business_data['attributes']['Ambience'].replace('\'', '"').replace('False', '"False"').replace('True', '"True"'))
                                           
             if 'romantic' in Ambience_dict and (Ambience_dict['romantic'] == 'True' or Ambience_dict['romantic'] is True):
@@ -263,36 +263,36 @@ def create_business_features(business_data):
             touristy = 0
             trendy = 0
             upscale = 0
-            ambience = 0
+            ambience = 0'''
 
     else:
         GoodForKids = 0
         RestaurantsGoodForGroups = 0
         BusinessAcceptsCreditCards = 0
-        BikeParking = 0
+        #BikeParking = 0
         OutdoorSeating = 0
-        RestaurantsDelivery = 0
-        Caters = 0
+        #RestaurantsDelivery = 0
+        #Caters = 0
         HasTV = 0
-        RestaurantsReservations = 0
+        #RestaurantsReservations = 0
         RestaurantsTableService = 0
-        ByAppointmentOnly = 0
+        #ByAppointmentOnly = 0
         RestaurantsTakeOut = 0
         AcceptsInsurance = 0
         WheelchairAccessible = 0
         RestaurantsPriceRange2 = 0
         no_wifi = 0
         no_wifi_info = 1
-        romantic = 0
-        intimate = 0
-        classy = 0
-        casual = 0
-        hipster = 0
-        divey = 0
-        touristy = 0
-        trendy = 0
-        upscale = 0
-        ambience = 0
+        #romantic = 0
+        #intimate = 0
+        #classy = 0
+        #casual = 0
+        #hipster = 0
+        #divey = 0
+        #touristy = 0
+        #trendy = 0
+        #upscale = 0
+        #ambience = 0
 
     business_feature = (business_data['business_id'], (latitude, longitude, stars, review_count, is_open, GoodForKids, RestaurantsGoodForGroups, BusinessAcceptsCreditCards, OutdoorSeating, HasTV, RestaurantsTableService, RestaurantsTakeOut, AcceptsInsurance, WheelchairAccessible, RestaurantsPriceRange2, no_wifi, no_wifi_info))
 
@@ -304,8 +304,8 @@ def create_features():
     user_rdd = sc.textFile(folder_path + '/user.json')
     business_rdd = sc.textFile(folder_path + '/business.json')
     checkin_rdd = sc.textFile(folder_path + '/checkin.json')
-    photo_rdd = sc.textFile(folder_path + '/photo.json')
-    tip_rdd = sc.textFile(folder_path + '/tip.json')
+    #photo_rdd = sc.textFile(folder_path + '/photo.json')
+    #tip_rdd = sc.textFile(folder_path + '/tip.json')
 
     average_dict = {}
 
@@ -313,29 +313,29 @@ def create_features():
 
     user_dict = user_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], (float(x['average_stars']), float(x['review_count']), float(x['fans']), float(x['useful']), float(x['compliment_note']), float(x['compliment_hot']), float(x['compliment_more']), float(x['compliment_profile']), float(x['compliment_cute']), float(x['compliment_list']), float(x['compliment_plain']), float(x['compliment_cool']), float(x['compliment_funny']), float(x['compliment_writer']), float(x['compliment_photos'])))).collectAsMap()
 
-    friends_dict = user_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], x['friends'].split(', ')) if x['friends'] else (x['user_id']['None'])).map(lambda x: (x[0], 0) if x[1] == ['None'] else (x[0], len(x[1]))).collectAsMap()
-    average_dict['friends'] = sum([friend for friend in friends_dict.values()]) / len(friends_dict)
+    #friends_dict = user_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], x['friends'].split(', ')) if x['friends'] else (x['user_id']['None'])).map(lambda x: (x[0], 0) if x[1] == ['None'] else (x[0], len(x[1]))).collectAsMap()
+    #average_dict['friends'] = sum([friend for friend in friends_dict.values()]) / len(friends_dict)
 
-    yelping_since_dict = user_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], int((x['yelping_since'].split('-')[0])))).collectAsMap()
+    #yelping_since_dict = user_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['user_id'], int((x['yelping_since'].split('-')[0])))).collectAsMap()
     
     business_dict = business_rdd.map(lambda x: json.loads(x)).map(create_business_features).collectAsMap()
     
-    days_open_dict = business_rdd.map(lambda x: json.loads(x)).filter(lambda x: ('hours' in x) and (x['hours'])).map(lambda x: (x['business_id'], len(x['hours']))).collectAsMap()
-    average_dict['days_open'] = sum([days for days in days_open_dict.values()]) / len(days_open_dict)
+    #days_open_dict = business_rdd.map(lambda x: json.loads(x)).filter(lambda x: ('hours' in x) and (x['hours'])).map(lambda x: (x['business_id'], len(x['hours']))).collectAsMap()
+    #average_dict['days_open'] = sum([days for days in days_open_dict.values()]) / len(days_open_dict)
 
     checkin_dict = checkin_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], len(x['time'].values()))).collectAsMap()
-    average_dict['checkin'] = sum([checkin for checkin in checkin_dict.values()]) / len(days_open_dict)
+    average_dict['checkin'] = sum([checkin for checkin in checkin_dict.values()]) / len(checkin_dict)
 
-    photo_dict = photo_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], 1)).reduceByKey(lambda x, y: x + y).collectAsMap()
-    average_dict['photo'] = sum([photo for photo in photo_dict.values()]) / len(photo_dict)
+    #photo_dict = photo_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], 1)).reduceByKey(lambda x, y: x + y).collectAsMap()
+    #average_dict['photo'] = sum([photo for photo in photo_dict.values()]) / len(photo_dict)
 
-    tip_dict = tip_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], x['likes'])).reduceByKey(lambda x, y: x + y).collectAsMap()
-    average_dict['tip'] = sum([tip for tip in tip_dict.values()]) / len(tip_dict)
+    #tip_dict = tip_rdd.map(lambda x: json.loads(x)).map(lambda x: (x['business_id'], x['likes'])).reduceByKey(lambda x, y: x + y).collectAsMap()
+    #average_dict['tip'] = sum([tip for tip in tip_dict.values()]) / len(tip_dict)
 
-    return review_dict, user_dict, friends_dict, average_dict, yelping_since_dict, business_dict, days_open_dict, checkin_dict, photo_dict, tip_dict
+    return review_dict, user_dict, average_dict, business_dict, checkin_dict
 
 
-def get_features(x, review_dict, user_dict, friends_dict, average_dict, yelping_since_dict, business_dict, days_open_dict, checkin_dict, photo_dict, tip_dict):
+def get_features(x, review_dict, user_dict, average_dict, business_dict, checkin_dict):
     user_id = x[0]
     business_id = x[1]
 
@@ -349,47 +349,46 @@ def get_features(x, review_dict, user_dict, friends_dict, average_dict, yelping_
     else:
         user_feature = (0,) * 15
 
-    if user_id in friends_dict:
+    '''if user_id in friends_dict:
         friends_feature = friends_dict[user_id]
     else:
-        friends_feature = average_dict['friends']
+        friends_feature = average_dict['friends']'''
 
-    if user_id in yelping_since_dict:
+    '''if user_id in yelping_since_dict:
         yelping_since_feature = yelping_since_dict[user_id]
     else:
-        yelping_since_feature = 0
+        yelping_since_feature = 0'''
 
     if business_id in business_dict:
         business_feature = business_dict[business_id]
     else:
         business_feature = (0,) * 17
 
-    if business_id in days_open_dict:
+    '''if business_id in days_open_dict:
         days_open_feature = days_open_dict[business_id]
     else:
-        days_open_feature = 0
+        days_open_feature = 0'''
 
     if business_id in checkin_dict:
         checkin_feature = checkin_dict[business_id]
     else:
         checkin_feature = average_dict['checkin']
 
-    if business_id in photo_dict:
+    '''if business_id in photo_dict:
         photo_feature = photo_dict[business_id]
     else:
-        photo_feature = 0
+        photo_feature = 0'''
 
-    if business_id in tip_dict:
+    '''if business_id in tip_dict:
         tip_feature = tip_dict[business_id]
     else:
-        tip_feature = average_dict['tip']
+        tip_feature = average_dict['tip']'''
 
     return [*review_feature, *user_feature, *business_feature, checkin_feature]
 
 
 def get_xgb_output(train_x, train_y, val_x):
     param = {
-        'lambda': 9.92724463758443,
         'alpha': 0.2765119705933928,
         'colsample_bytree': 0.5,
         'subsample': 0.8,
@@ -397,7 +396,7 @@ def get_xgb_output(train_x, train_y, val_x):
         'max_depth': 17,
         'random_state': 2020,
         'min_child_weight': 101,
-        'n_estimators': 300
+        'n_estimators': 400
         }
 
     xgb = XGBRegressor(**param)
@@ -426,11 +425,11 @@ def get_catboost_output(train_x, train_y, val_x):
 
 
 def model_based_collaborative_filtering(yelp_train, yelp_val):
-    review_dict, user_dict, friends_dict, average_dict, yelping_since_dict, business_dict, days_open_dict, checkin_dict, photo_dict, tip_dict = create_features()
+    review_dict, user_dict, average_dict, business_dict, checkin_dict = create_features()
     
-    train_x = np.array([get_features(x, review_dict, user_dict, friends_dict, average_dict, yelping_since_dict, business_dict, days_open_dict, checkin_dict, photo_dict, tip_dict) for x in yelp_train], dtype = 'float32')
+    train_x = np.array([get_features(x, review_dict, user_dict, average_dict, business_dict, checkin_dict) for x in yelp_train], dtype = 'float32')
     train_y = np.array([float(x[2]) for x in yelp_train], dtype = 'float32')
-    val_x = np.array([get_features(x, review_dict, user_dict, friends_dict, average_dict, yelping_since_dict, business_dict, days_open_dict, checkin_dict, photo_dict, tip_dict) for x in yelp_val], dtype = 'float32')
+    val_x = np.array([get_features(x, review_dict, user_dict, average_dict, business_dict, checkin_dict) for x in yelp_val], dtype = 'float32')
     
     xgb_output = get_xgb_output(train_x, train_y, val_x)
     catboost_output = get_catboost_output(train_x, train_y, val_x)
@@ -491,7 +490,7 @@ print(round(end - begin, 2), 's')
 
 '''
 def xgb_tuning(trial):
-	param = {
+    param = {
         'lambda': trial.suggest_loguniform('lambda', 1e-8, 1.0),
         'alpha': trial.suggest_loguniform('alpha', 1e-8, 1.0),
         'colsample_bytree': trial.suggest_float('colsample_bytree', 0.1, 1.0),
@@ -501,7 +500,7 @@ def xgb_tuning(trial):
         'min_child_weight': trial.suggest_int('min_child_weight', 1, 300),
         'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
         'random_state': 2020
-    	}
+        }
     
     xgb = XGBRegressor(**param)
     kf = KFold(n_splits=5, shuffle=True)
@@ -511,7 +510,7 @@ def xgb_tuning(trial):
 
 
 def catboost_tuning(trial):
-	param = {
+    param = {
         'random_state': trial.suggest_int('random_state', 1, 100),
         'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
         'n_estimators': trial.suggest_int('n_estimators', 100, 2000),
@@ -519,7 +518,7 @@ def catboost_tuning(trial):
         'max_bin': trial.suggest_int('max_bin', 10, 255),
         'verbose': 0,
         'colsample_bylevel': trial.suggest_float('colsample_bylevel', 0.1, 1.0)
-    	}
+        }
     
     catboost = CatBoostRegressor(**param)
     kf = KFold(n_splits=5, shuffle=True)
